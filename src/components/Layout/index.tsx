@@ -34,7 +34,7 @@ export function Layout({ children }: LayoutProps) {
 
             <Stack direction="row" gap="4">
               <Link
-                href="https://github.com/ThyMont/one-hundred-days-001-todo-list"
+                href="https://github.com/ThyMont"
                 target="_blank"
                 rel="noopener noreferrer"
                 display="flex"
