@@ -30,7 +30,7 @@ export function Navbar() {
         {user ? (
           <Menu.Root>
             <Menu.Trigger asChild>
-              <Button variant="ghost" color="white">
+              <Button variant="surface" colorScheme="blue">
                 {user.username}
               </Button>
             </Menu.Trigger>

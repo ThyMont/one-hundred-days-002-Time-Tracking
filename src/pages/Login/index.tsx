@@ -54,6 +54,7 @@ export function Login() {
           <Input
             placeholder="Username"
             value={username}
+            maxLength={15}
             onChange={(e) => setUsername(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleContinue()}
           />
