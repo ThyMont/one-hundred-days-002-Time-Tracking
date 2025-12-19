@@ -1,46 +1,77 @@
-import { createContext, useState, type ReactNode } from "react";
-
-type User = {
-  name: string;
-};
+import { createContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { User } from "@/types";
+import { createId } from "@/lib/id";
+import {
+  clearCurrentUserId,
+  getCurrentUserId,
+  getUsers,
+  saveUsers,
+  setCurrentUserId,
+} from "@/lib/storage";
 
 type AuthContextData = {
   user: User | null;
-  login: (user: User) => void;
-  logout: () => void;
   isAuthenticated: boolean;
+  isReady: boolean;
+  loginWithUsername: (username: string) => void;
+  logout: () => void;
 };
 
 export const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+export function AuthProvider({ children }: { children: ReactNode }) {
+  // ✅ inicializa sincronamente lendo do localStorage
+  const [user, setUser] = useState<User | null>(() => {
+    const currentId = getCurrentUserId();
+    if (!currentId) return null;
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>({
-    name: "John Doe",
+    const users = getUsers();
+    return users.find((u) => u.id === currentId) ?? null;
   });
-  // const [user, setUser] = useState<User | null>(null);
 
-  function login(user: User) {
-    setUser(user);
+  // ✅ sinaliza quando o auth já "bootstrappou"
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  function loginWithUsername(username: string) {
+    const cleaned = username.trim();
+    if (!cleaned) return;
+
+    const users = getUsers();
+    const existing = users.find((u) => u.username.toLowerCase() === cleaned.toLowerCase());
+
+    const nextUser: User = existing ?? {
+      id: createId("usr"),
+      username: cleaned,
+      createdAt: new Date().toISOString(),
+    };
+
+    if (!existing) {
+      saveUsers([...users, nextUser]);
+    }
+
+    setCurrentUserId(nextUser.id);
+    setUser(nextUser);
   }
 
   function logout() {
+    clearCurrentUserId();
     setUser(null);
   }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        logout,
-        isAuthenticated: !!user,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isReady,
+      loginWithUsername,
+      logout,
+    }),
+    [user, isReady]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

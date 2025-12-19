@@ -7,6 +7,7 @@ import "@fontsource/roboto/400.css"; // Peso 400 padrão
 import "@fontsource/roboto/300.css"; // Peso específico
 import "@fontsource/roboto/700.css"; // Peso específico
 import { AuthProvider } from "@/contexts/AuthContext.tsx";
+import { Toaster } from "@/components/ui/toaster.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -14,6 +15,7 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <AuthProvider>
           <App />
+          <Toaster />
         </AuthProvider>
       </BrowserRouter>
     </Provider>
